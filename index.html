@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Landing Page</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <title>HưngNK86</title>
   <style>
     /* General reset */
     * {
@@ -14,17 +15,44 @@
 
     body {
       font-family: Arial, sans-serif;
-      background-color: #ffffff;
-      color: #000;
+      background-color: #080808;
+      color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .video-background,
+    .video-overlay {
+      position: fixed;
+      inset: 0;
+    }
+
+    .video-background {
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .video-background video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .video-overlay {
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.82);
     }
 
     .quote-container {
+      position: relative;
+      z-index: 2;
       max-width: 600px;
       padding: 20px;
+      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.9);
     }
 
     .quote {
@@ -39,9 +67,34 @@
       font-weight: bold;
       text-align: right;
     }
+
+    .sound-toggle {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 3;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.58);
+      color: #fff;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .sound-toggle:hover,
+    .sound-toggle:focus-visible {
+      background: rgba(255, 255, 255, 0.2);
+      outline: 2px solid #fff;
+      outline-offset: 3px;
+    }
   </style>
 </head>
 <body>
+  <div class="video-background" aria-hidden="true">
+    <video src="hungnk86.mp4" id="background-video" autoplay muted loop playsinline preload="metadata"></video>
+  </div>
+  <div class="video-overlay" aria-hidden="true"></div>
   <div class="quote-container">
     <div class="quote">
       "Nước trong quá thì không có cá<br>
@@ -51,5 +104,35 @@
     </div>
     <div class="author">- Hungnk86</div>
   </div>
+  <button class="sound-toggle" id="sound-toggle" type="button" aria-pressed="false" aria-label="Bật âm thanh cho video nền">Bật âm thanh</button>
+  <script>
+    const backgroundVideo = document.getElementById('background-video');
+    const soundToggle = document.querySelector('#sound-toggle');
+    const spokenSegmentStart = 852;
+
+    backgroundVideo.addEventListener('loadedmetadata', () => {
+      if (backgroundVideo.duration > spokenSegmentStart) {
+        backgroundVideo.currentTime = spokenSegmentStart;
+      }
+    }, { once: true });
+
+    soundToggle.addEventListener('click', async () => {
+      const shouldEnableSound = backgroundVideo.muted;
+      backgroundVideo.muted = !shouldEnableSound;
+
+      if (shouldEnableSound) {
+        try {
+          await backgroundVideo.play();
+        } catch {
+          backgroundVideo.muted = true;
+        }
+      }
+
+      const isSoundOn = !backgroundVideo.muted;
+      soundToggle.setAttribute('aria-pressed', String(isSoundOn));
+      soundToggle.textContent = isSoundOn ? 'Tắt âm thanh' : 'Bật âm thanh';
+      soundToggle.setAttribute('aria-label', soundToggle.textContent + ' cho video nền');
+    });
+  </script>
 </body>
 </html>
